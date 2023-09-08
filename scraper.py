@@ -12,28 +12,24 @@ import time
 import glob
 import os
 
+# Opening Safari browser
 browser = webdriver.Safari()
 
+# Going to webiste
 browser.get('https://app.leonardo.ai/auth/login')
 
-# loginButton = browser.find_element("xpath",'//*[@id="__next"]/div/div/div/button')
-
-# WebDriverWait(browser, 10).until(EC.presence_of_element_located(("xpath",'//*[@id="__next"]/div/div/div/button')))
-# # browser.execute_script("arguments[0].click*();", loginButton)
-
-# browser.find_element("xpath",'//*[@id="__next"]/div/div/div/button').click()
-
+# Login info on website
 WebDriverWait(browser, 10).until(EC.presence_of_element_located(("xpath",'//*[@id="email"]')))
 
-browser.find_element("xpath",'//*[@id="email"]').send_keys('lautan12233@gmail.com')
+browser.find_element("xpath",'//*[@id="email"]').send_keys('XXXXXXXXgmail.com')
+browser.find_element("xpath",'//*[@id="password"]').send_keys('xxxxxxxxx')
 
-
-browser.find_element("xpath",'//*[@id="password"]').send_keys('H0gw@rts')
 time.sleep(2)
 
 browser.find_element("xpath", '//*[@id="__next"]/div/div[2]/div[2]/div[2]/div[2]/div[1]/form/div/button').submit()
 
 browser.maximize_window()
+
 WebDriverWait(browser, 10).until(EC.presence_of_element_located(("xpath", '//*[@id="chakra-modal-:r17:"]/footer/div/button[2]')))
 
 for x in range(0,5):
@@ -41,28 +37,16 @@ for x in range(0,5):
 
 browser.find_element("xpath", '//*[@id="chakra-modal--body-:r18:"]/div/div[2]/div/div/div/div[3]/button').click()
 
-# WebDriverWait(browser, 10).until(EC.presence_of_element_located(("xpath",'//*[@id="__next"]/div/div/div[2]/div/div[3]/div[1]/div[1]/div/div[2]/div/button[3]')))
-
-# browser.execute_script("window.scrollTo(100,document.body.scrollHeight);")
-
-# time.sleep(2)
-
-# browser.find_element("xpath", '//*[@id="__next"]/div/div/div[2]/div/div[3]/div[1]/div[1]/div/div[2]/div/button[3]').click()
-
-# WebDriverWait(browser, 30).until(EC.presence_of_element_located(("xpath", '//*[@id="__next"]/div/div/div[2]/div/div[3]/div[2]/div/div/div[1]/div[1]/div/div/div[2]')))
-
-
 
 time.sleep(5)
 
-
-
+# Scrolling the page for specific amount of time to load a large amount of images to download
 screen_height = browser.execute_script("return window.screen.height;")
-i = 1
 
-# t_end = time.time() + 600
+i = 1
+t_end = time.time() + 600
 # time.time() < t_end:
-while True:
+while time.time() < t_end:
     # scroll one screen height each time
     browser.execute_script("window.scrollTo(0, {screen_height}*{i});".format(screen_height=screen_height, i=i))  
     i += 1
@@ -76,13 +60,19 @@ while True:
 time.sleep(2)
 
 browser.execute_script("window.scrollTo(0,220);")
+
 time.sleep(8)
+
+# Go to first photo on the page
 browser.find_element("xpath", '//*[@id="__next"]/div/div[2]/div/div[3]/div[2]/div/div/div[1]/div[1]/div/div/div[2]').click()
-count = 548
+count = 1 # keep count to track number of images downloading
+
+# opening a csv file to write images names and corresponding prompts
 with open('dataset copy.csv','a') as file:
     while True:
         time.sleep(2)
 
+        # Error handling if element on page does not load properly
         try:
             WebDriverWait(browser, 10).until(EC.presence_of_element_located(("xpath", "//*[starts-with(@id, 'chakra-modal--body-:')]/div/div[1]/div[1]/div[5]/div/button[2]")))
             browser.find_element("xpath", "//*[starts-with(@id, 'chakra-modal--body-:')]/div/div[1]/div[1]/div[5]/div/button[2]").click()
@@ -95,12 +85,12 @@ with open('dataset copy.csv','a') as file:
                 print("elements on page did not load properly")
                 break
                 
+        time.sleep(8) # give time for image to download
 
-        time.sleep(8)
-
-        # * means all if need specific format then *.csv
+        # Error handling if image does not downlad properly
         try: 
-            filesList = glob.glob('/Users/poojasmac/Downloads/*.jpg') 
+            # Putting current downloaded image in specific folder on computer
+            filesList = glob.glob('/Users/poojasmac/Downloads/*.jpg')  # * means all if need specific format then *.csv
             recentFile = max(filesList, key=os.path.getctime)
         except:
             # print("file was not downloaded properly")
@@ -112,12 +102,12 @@ with open('dataset copy.csv','a') as file:
 
         newFile = os.path.join('/Users/poojasmac/Downloads/', imageName)
 
-        #prints a.txt which was latest file i created
         os.rename(recentFile, newFile)
 
         filesList = glob.glob('/Users/poojasmac/Downloads/*.jpg') 
         recentFile = max(filesList, key=os.path.getctime)
    
+        # Changing image size using ratio so image is not distorted
         image = Image.open(recentFile)
         imageSize = image.size
         print(f"Original image size: {imageSize}")
@@ -141,29 +131,16 @@ with open('dataset copy.csv','a') as file:
 
         prompt = browser.find_element("xpath", "//*[starts-with(@id, 'chakra-modal--body-:')]/div/div[1]/div[2]/div[2]/div[1]/div/div/p").text
 
+        # Writing image name and corresponding prompt to the csv file
         writer = csv.writer(file, delimiter="~")
         writer.writerow([imageName, prompt])
 
-        if count == 548:
+        if count == 1:
             browser.find_element("xpath", '/html/body/div[4]/div[2]/div/div/button').click()
             count+=1
         else:
             browser.find_element("xpath", '/html/body/div[4]/div[2]/div/div[2]/button').click()
             count+=1
+# Closing file and browser
 file.close()
-# WebDriverWait(browser, 30).until(EC.presence_of_element_located(("xpath", "//*[starts-with(@id, 'menu-button-')]")))
-
-# browser.find_element("xpath", "//*[starts-with(@id, 'menu-button-')]").click()
-
-# WebDriverWait(browser, 10).until(EC.presence_of_element_located(("xpath", "//*[starts-with(@id, 'chakra-modal--body-')]/div/div[1]/div[1]/div[4]/div[1]")))
-
-# browser.find_element("xpath", '//button[normalize-space()="Original Image"]').click()
-
-# SCROLL DOWN!!
-# browser.sendKeys(Keys.PAGE_DOWN);
-
-time.sleep(10)
-print("Page title is: ")
-print(browser.title)
 browser.close()
-# xpath = '//*[@id="__next"]/div/div/div/button'
